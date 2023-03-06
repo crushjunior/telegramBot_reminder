@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class TelegramBotUpdatesListener implements UpdatesListener {
+public class TelegramBotUpdatesListener implements UpdatesListener { // сервис отвечающий на сообщения и сохраняющий задачи в БД
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
@@ -38,7 +38,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.setUpdatesListener(this);
     }
 
-    @Override
+    @Override // метод который проходит по апдейтам, и если было отправлено сообщение /start или задача типа: 01.01.2023 20:00 Task, то отвечает на них.
     public int process(List<Update> updates) {
         updates.forEach(update -> {
             logger.info("Processing update: {}", update);
@@ -46,15 +46,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
             if (incomeMessage != null) {
                 String nameUser = update.message().chat().firstName();
-                Pattern pattern = Pattern.compile("([0-9\\.\\:\\s]{16})(\\s)([\\W+]+)");
-                Matcher matcher = pattern.matcher(incomeMessage);
+                Pattern pattern = Pattern.compile("([0-9\\.\\:\\s]{16})(\\s)([\\W+]+)"); // регулярное выражение
+                Matcher matcher = pattern.matcher(incomeMessage); // проверяет пришедшее сообщение на регулярное выражение
 
                 if (incomeMessage.equals("/start")) {
                     String messageText = "Hello, " + nameUser + "!" + '\n' + "Enter a reminder in the format: 01.01.2023 20:00 Task";
                     sendMessage(update, messageText);
                 }
 
-                if (matcher.matches()) {
+                if (matcher.matches()) { // если есть совпадения по регулярному выражению, то:
                     NotificationTask notification = new NotificationTask();
                     Timestamp date = Timestamp.valueOf(LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))); // извлекаем из 1 группы время в нужном формате и сохраняем в переменную
                     String task = String.valueOf(matcher.group(3));
